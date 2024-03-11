@@ -6,15 +6,17 @@
 .knob {
   position: absolute;
   border-radius: 100%;
-  border: 1px solid gray;
+  border-width: 1px;
+  border-style: solid;
+  border-color: gray;
   width: 30px;
   height: 30px;
   background-color: white;
   cursor: grab;
 
-  top: -3;
+  top: 13px;
   left: 50%;
-  transform: translate(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .dragging {

@@ -59,7 +59,6 @@ function knobDragging(event) {
   let relativeY = mouseY - containerY;
   let theta = Math.atan2(relativeY, relativeX);
 
-
   //First quadrant
   if (relativeX >= 0 && relativeY <= 0) {
     theta += Math.PI / 2;
@@ -74,7 +73,14 @@ function knobDragging(event) {
     theta += 2 * Math.PI + (Math.PI / 2);
   }
 
-  theta = (theta * 180) / Math.PI;
+  //Offsetting knob position according to its radius. We also subsctract 2 as it is its border.
+  let knobOffset = (this.getBoundingClientRect().width / 2) - 2;
 
-  console.log(theta);
+  let radius = (containerBoundingRect.height / 2) - knobOffset;
+  let knobPositionY = radius * Math.cos(theta);
+  let knobPositionX = radius * Math.sin(theta);
+
+  this.style.top = radius - knobPositionY + knobOffset;
+  this.style.left = radius + knobPositionX + knobOffset;
+
 }
