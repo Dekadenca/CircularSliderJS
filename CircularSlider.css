@@ -1,0 +1,22 @@
+.circularSlider {
+  border-radius: 100%;
+  border: 25px solid black;
+}
+
+.knob {
+  position: absolute;
+  border-radius: 100%;
+  border: 1px solid gray;
+  width: 30px;
+  height: 30px;
+  background-color: white;
+  cursor: grab;
+
+  top: -3;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.dragging {
+  cursor: grabbing;
+}
