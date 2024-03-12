@@ -1,3 +1,5 @@
+var SLIDER_BORDER_SIZE = 25;
+
 function circularSlider({
   container,
   color = "red",
@@ -6,33 +8,73 @@ function circularSlider({
   step = 50,
   radius = 250,
 }) {
+  container = document.querySelector(container);
+  container.style.width = 250 + (SLIDER_BORDER_SIZE * 2);
+  container.style.height = 250 + (SLIDER_BORDER_SIZE * 2);
 
-  let mainContainer = document.createElement("div");
-  mainContainer.style.position = "absolute";
+  let sliderContainer = document.createElement("div");
+  sliderContainer.style.position = "absolute";
 
+  //Creating a slider element
   let slider = document.createElement("div");
   slider.classList.add("circularSlider");
   slider.style.width = radius;
   slider.style.height = radius;
-  mainContainer.appendChild(slider);
+  slider.onmousedown = onSliderClick;
+  sliderContainer.appendChild(slider);
 
+  //Creating knob element that is used to drag along the slider
   let knob = document.createElement("div");
   knob.classList.add("knob");
   knob.onmousedown = onKnobDrag;
-  mainContainer.appendChild(knob);
+  sliderContainer.appendChild(knob);
 
+  //Overlay element that hides
+  let overlayContainer1 = document.createElement("div");
+  overlayContainer1.classList.add("overlay_container");
+  let overlay1 = document.createElement("div");
+  overlay1.classList.add("overlay");
+  overlayContainer1.appendChild(overlay1);
 
+  let overlayContainer2 = document.createElement("div");
+  overlayContainer2.classList.add("overlay_container");
+  let overlay2 = document.createElement("div");
+  overlay2.classList.add("overlay", "overlay_right");
+  overlayContainer2.appendChild(overlay2);
 
-  document.querySelector(container).appendChild(mainContainer);
+  slider.appendChild(overlayContainer1);
+  slider.appendChild(overlayContainer2);
+
+  container.appendChild(sliderContainer);
 
   return;
+}
+
+function onSliderClick(event) {
+  let containerBoundingBox = this.getBoundingClientRect();
+  let containerRadius = containerBoundingBox.width / 2;
+
+  //Get relative click location inside slider div
+  let relativeClickLocationX = event.clientX - containerBoundingBox.left;
+  let relativeClickLocationY = event.clientY - containerBoundingBox.top;
+
+  //Check if click was on the slider border
+  if (
+    //Checks max circle
+    Math.pow(relativeClickLocationX - containerRadius, 2) + Math.pow(relativeClickLocationY - containerRadius, 2) < Math.pow(containerRadius, 2) &&
+    //Checks min circle
+    Math.pow(relativeClickLocationX - containerRadius, 2) + Math.pow(relativeClickLocationY - containerRadius, 2) > Math.pow(containerRadius - SLIDER_BORDER_SIZE, 2)
+  ) {
+    let sliderKnob = this.parentNode.querySelector(".knob");
+    onKnobDrag.bind(sliderKnob, event)();
+  }
+
 }
 
 function onKnobDrag(event) {
   event.preventDefault();
 
   let dragFunction = knobDragging.bind(this);
-
   this.classList.add("dragging");
   addEventListener("mousemove", dragFunction);
   document.body.classList.add("dragging");
@@ -76,11 +118,28 @@ function knobDragging(event) {
   //Offsetting knob position according to its radius. We also subsctract 2 as it is its border.
   let knobOffset = (this.getBoundingClientRect().width / 2) - 2;
 
+  //Calculating and setting the knob position
   let radius = (containerBoundingRect.height / 2) - knobOffset;
   let knobPositionY = radius * Math.cos(theta);
   let knobPositionX = radius * Math.sin(theta);
 
   this.style.top = radius - knobPositionY + knobOffset;
   this.style.left = radius + knobPositionX + knobOffset;
+
+  let sliderContainer = this.parentNode.querySelector(".circularSlider");
+  let overLays = sliderContainer.querySelectorAll(".overlay_container");
+
+  let rotation = (theta * 180) / Math.PI;
+  let overlayRotationLeft, overlayRotationRight;
+  if (rotation < 180) {
+    overlayRotationLeft = 0;
+    overlayRotationRight = rotation;
+  } else {
+    overlayRotationLeft = rotation + 180;
+    overlayRotationRight = 180;
+  }
+
+  overLays[0].style.transform = "rotate(" + overlayRotationLeft + "deg)";
+  overLays[1].style.transform = "rotate(" + overlayRotationRight + "deg)";
 
 }
