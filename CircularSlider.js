@@ -1,23 +1,41 @@
 var SLIDER_BORDER_SIZE = 25;
+var LABEL_CONTAINER_WIDTH = 200;
 
 function circularSlider({
   container,
+  label,
   color = "red",
   max = 1000,
   min = 0,
   step = 50,
   radius = 250,
 }) {
+  if (!container) {
+    console.log("Missing container selector");
+    return;
+  }
+
+  if (!label) {
+    console.log("Missing label");
+    return;
+  }
+
   container = document.querySelector(container);
-  container.style.width = 250 + (SLIDER_BORDER_SIZE * 2);
+  container.style.width = 250 + (SLIDER_BORDER_SIZE * 2) + LABEL_CONTAINER_WIDTH;
   container.style.height = 250 + (SLIDER_BORDER_SIZE * 2);
 
+  //Create label container if not exists
+  let labelContainer = document.createElement("div");
+  labelContainer.style.width = LABEL_CONTAINER_WIDTH;
+  labelContainer.classList.add("label_container");
+  labelContainer.appendChild(createLabel(color, label, max, min, step));
+
   let sliderContainer = document.createElement("div");
-  sliderContainer.style.position = "absolute";
+  sliderContainer.style.position = "relative";
 
   //Creating a slider element
   let slider = document.createElement("div");
-  slider.classList.add("circularSlider");
+  slider.classList.add("circular_slider");
   slider.style.width = radius;
   slider.style.height = radius;
   slider.onmousedown = onSliderClick;
@@ -26,6 +44,7 @@ function circularSlider({
   //Creating knob element that is used to drag along the slider
   let knob = document.createElement("div");
   knob.classList.add("knob");
+  knob.dataset.label = transformForDataset(label);
   knob.onmousedown = onKnobDrag;
   sliderContainer.appendChild(knob);
 
@@ -45,9 +64,39 @@ function circularSlider({
   slider.appendChild(overlayContainer1);
   slider.appendChild(overlayContainer2);
 
+  container.appendChild(labelContainer);
   container.appendChild(sliderContainer);
 
   return;
+}
+
+function createLabel(color, label, max, min, step) {
+  //Create new label div
+  let labelDiv = document.createElement("div");
+  labelDiv.id = transformForDataset(label);
+  labelDiv.dataset.max = max;
+  labelDiv.dataset.min = min;
+  labelDiv.dataset.step = step;
+  labelDiv.classList.add("label");
+
+  //Label value that changes on drag
+  let labelValue = document.createElement("div");
+  labelValue.classList.add("label_value");
+  labelValue.innerHTML = "$0";
+  labelDiv.appendChild(labelValue);
+
+  //Label color
+  let labelColor = document.createElement("div");
+  labelColor.classList.add("label_color");
+  labelColor.style.backgroundColor = color;
+  labelDiv.appendChild(labelColor);
+
+  //Label text value
+  let labelText = document.createElement("div");
+  labelText.innerHTML = label;
+  labelDiv.appendChild(labelText);
+
+  return labelDiv;
 }
 
 function onSliderClick(event) {
@@ -68,7 +117,6 @@ function onSliderClick(event) {
     let sliderKnob = this.parentNode.querySelector(".knob");
     onKnobDrag.bind(sliderKnob, event)();
   }
-
 }
 
 function onKnobDrag(event) {
@@ -87,12 +135,19 @@ function onKnobDrag(event) {
 }
 
 function knobDragging(event) {
+  let container = this.parentNode;
+  let label = this.parentNode.parentNode.querySelector(".label_container #" + this.dataset.label);
+  let labelValue = label.querySelector(".label_value");
+  let min = parseInt(label.dataset.min);
+  let max = parseInt(label.dataset.max);
+  let step = label.dataset.step;
+
   //Mouse coordinates
   let mouseX = event.pageX;
   let mouseY = event.pageY;
 
   //Container center coordinates
-  let containerBoundingRect = this.parentNode.getBoundingClientRect();
+  let containerBoundingRect = container.getBoundingClientRect();
   let containerX = (containerBoundingRect.width / 2) + containerBoundingRect.x;
   let containerY = (containerBoundingRect.height / 2) + containerBoundingRect.y;
 
@@ -126,7 +181,7 @@ function knobDragging(event) {
   this.style.top = radius - knobPositionY + knobOffset;
   this.style.left = radius + knobPositionX + knobOffset;
 
-  let sliderContainer = this.parentNode.querySelector(".circularSlider");
+  let sliderContainer = this.parentNode.querySelector(".circular_slider");
   let overLays = sliderContainer.querySelectorAll(".overlay_container");
 
   let rotation = (theta * 180) / Math.PI;
@@ -142,4 +197,13 @@ function knobDragging(event) {
   overLays[0].style.transform = "rotate(" + overlayRotationLeft + "deg)";
   overLays[1].style.transform = "rotate(" + overlayRotationRight + "deg)";
 
+  //Set label value
+  let value = Math.ceil((rotation * (max - min)) / 360);
+  labelValue.innerHTML = "$" + (value + min);
+}
+
+//HELPERS
+
+function transformForDataset(text) {
+  return text.toLowerCase().replace(" ", "_");
 }
