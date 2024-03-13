@@ -140,7 +140,7 @@ function knobDragging(event) {
   let labelValue = label.querySelector(".label_value");
   let min = parseInt(label.dataset.min);
   let max = parseInt(label.dataset.max);
-  let step = label.dataset.step;
+  let step = parseInt(label.dataset.step);
 
   //Mouse coordinates
   let mouseX = event.pageX;
@@ -169,6 +169,21 @@ function knobDragging(event) {
   } else if (relativeX <= 0 && relativeY <= 0) {
     theta += 2 * Math.PI + (Math.PI / 2);
   }
+  let rotation = (theta * 180) / Math.PI;
+
+  //Set label value according to step
+  let value = Math.ceil((rotation * (max - min)) / 360);
+  if (value % step > step / 2) {
+    value += step - (value % step);
+  } else {
+    value -= value % step;
+  }
+  labelValue.innerHTML = "$" + (value + min);
+
+  //Modified angle with step
+  rotation = (value * 360) / (max - min);
+  //Transformed to radians to be used when setting know location
+  theta = (Math.PI * rotation) / 180;
 
   //Offsetting knob position according to its radius. We also subsctract 2 as it is its border.
   let knobOffset = (this.getBoundingClientRect().width / 2) - 2;
@@ -178,13 +193,19 @@ function knobDragging(event) {
   let knobPositionY = radius * Math.cos(theta);
   let knobPositionX = radius * Math.sin(theta);
 
-  this.style.top = radius - knobPositionY + knobOffset;
-  this.style.left = radius + knobPositionX + knobOffset;
 
+  knobPositionX = radius + knobPositionX + knobOffset;
+  knobPositionY = radius - knobPositionY + knobOffset;
+  //Set knob position
+
+
+  this.style.left = knobPositionX;
+  this.style.top = knobPositionY;
+
+  //Overlays
   let sliderContainer = this.parentNode.querySelector(".circular_slider");
   let overLays = sliderContainer.querySelectorAll(".overlay_container");
 
-  let rotation = (theta * 180) / Math.PI;
   let overlayRotationLeft, overlayRotationRight;
   if (rotation < 180) {
     overlayRotationLeft = 0;
@@ -196,10 +217,6 @@ function knobDragging(event) {
 
   overLays[0].style.transform = "rotate(" + overlayRotationLeft + "deg)";
   overLays[1].style.transform = "rotate(" + overlayRotationRight + "deg)";
-
-  //Set label value
-  let value = Math.ceil((rotation * (max - min)) / 360);
-  labelValue.innerHTML = "$" + (value + min);
 }
 
 //HELPERS
