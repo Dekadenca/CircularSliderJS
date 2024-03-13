@@ -1,3 +1,15 @@
+@property --progress {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --overlay-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: black;
+}
+
 .container {
   display: flex;
   background: rgb(102, 102, 102);
@@ -32,8 +44,22 @@
 }
 
 .circular_slider {
+  display: grid;
+  place-items: center;
   border-radius: 100%;
-  border: 25px solid black;
+  overflow: hidden;
+
+  background: conic-gradient(var(--overlay-color), var(--overlay-color) var(--progress), gray 0%);
+}
+
+.circular_slider::after {
+  content: "";
+  background: white;
+  width: calc(100% - 54px);
+  aspect-ratio: 1;
+  border-radius: inherit;
+  display: grid;
+  place-items: center;
 }
 
 .knob {
@@ -48,7 +74,7 @@
   background-color: white;
   cursor: grab;
 
-  top: 13px;
+  top: 14px;
   left: 50%;
   transform: translate(-50%, -50%);
 }
