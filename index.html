@@ -6,11 +6,31 @@
 <script>
   circularSlider({
     container: "#container",
+    label: "Transportation",
+    color: "purple",
+    max: 1000,
+    min: 150,
+    step: 50,
+    radius: 350,
+  });
+
+  circularSlider({
+    container: "#container",
     label: "Health care",
     color: "red",
     max: 1000,
-    min: 150,
+    min: 200,
     step: 20,
     radius: 250,
+  });
+
+  circularSlider({
+    container: "#container",
+    label: "Food",
+    color: "blue",
+    max: 2000,
+    min: 50,
+    step: 100,
+    radius: 150,
   });
 </script>

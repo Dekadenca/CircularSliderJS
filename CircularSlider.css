@@ -25,6 +25,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  align-content: center;
 }
 
 .label {
@@ -43,11 +45,15 @@
   font-weight: bold;
 }
 
+.sliders_container {
+  position: relative;
+}
+
 .circular_slider {
+  position: absolute;
   display: grid;
   place-items: center;
   border-radius: 100%;
-  overflow: hidden;
 
   background: conic-gradient(var(--overlay-color), var(--overlay-color) var(--progress), gray 0%);
 }

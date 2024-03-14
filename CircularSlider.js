@@ -1,6 +1,8 @@
 var KNOB_SIZE = 30;
 var LABEL_CONTAINER_WIDTH = "12rem";
 
+var isMobile = mobileAndTabletCheck();
+
 function circularSlider({
   container,
   label,
@@ -20,16 +22,30 @@ function circularSlider({
     return;
   }
 
+  //Setting the height of container to the biggest slider
   container = document.querySelector(container);
+  if (container.getBoundingClientRect().height < radius) {
+    container.style.height = radius;
+  }
 
   //Create label container if not exists
-  let labelContainer = document.createElement("div");
+  let labelContainer = container.querySelector(".label_container");
+  if (!labelContainer) {
+    labelContainer = document.createElement("div");
+    container.appendChild(labelContainer);
+  }
+
+  //Create container for sliders
+  let slidersContainer = container.querySelector(".sliders_container");
+  if (!slidersContainer) {
+    slidersContainer = document.createElement("div");
+    slidersContainer.classList.add("sliders_container");
+    container.appendChild(slidersContainer);
+  }
+
   labelContainer.style.width = LABEL_CONTAINER_WIDTH;
   labelContainer.classList.add("label_container");
   labelContainer.appendChild(createLabel(color, label, max, min, step));
-
-  let sliderContainer = document.createElement("div");
-  sliderContainer.style.position = "relative";
 
   //Creating a slider element
   let slider = document.createElement("div");
@@ -37,18 +53,32 @@ function circularSlider({
   slider.style.width = radius;
   slider.style.height = radius;
   slider.style.setProperty("--overlay-color", color);
-  slider.onmousedown = onSliderClick;
-  sliderContainer.appendChild(slider);
+  if (isMobile) {
+    slider.ontouchstart = onSliderClick;
+  } else {
+    slider.onmousedown = onSliderClick;
+  }
+  slidersContainer.appendChild(slider);
 
   //Creating knob element that is used to drag along the slider
   let knob = document.createElement("div");
   knob.classList.add("knob");
   knob.dataset.label = transformForDataset(label);
-  knob.onmousedown = onKnobDrag;
-  sliderContainer.appendChild(knob);
+  if (isMobile) {
+    knob.ontouchstart = onKnobDrag;
+  } else {
+    knob.onmousedown = onKnobDrag;
+  }
+  slider.appendChild(knob);
 
-  container.appendChild(labelContainer);
-  container.appendChild(sliderContainer);
+  slidersContainer.appendChild(slider);
+
+  //Correct position of sliders after all of them are added
+  let sliders = slidersContainer.children;
+  for (let i = 0; i < sliders.length; i++) {
+    sliders[i].style.left = Math.abs(sliders[i].getBoundingClientRect().height - container.getBoundingClientRect().height) / 2;
+    sliders[i].style.top = Math.abs(sliders[i].getBoundingClientRect().height - container.getBoundingClientRect().height) / 2;
+  }
 
   return;
 }
@@ -65,7 +95,7 @@ function createLabel(color, label, max, min, step) {
   //Label value that changes on drag
   let labelValue = document.createElement("div");
   labelValue.classList.add("label_value");
-  labelValue.innerHTML = "$0";
+  labelValue.innerHTML = "$" + min;
   labelDiv.appendChild(labelValue);
 
   //Label color
@@ -86,9 +116,16 @@ function onSliderClick(event) {
   let containerBoundingBox = this.getBoundingClientRect();
   let containerRadius = containerBoundingBox.width / 2;
 
+  let clientX = event.clientX;
+  let clientY = event.clientY;
+  if (isMobile) {
+    clientX = event.touches[0].clientX;
+    clientY = event.touches[0].clientY;
+  }
+
   //Get relative click location inside slider div
-  let relativeClickLocationX = event.clientX - containerBoundingBox.left;
-  let relativeClickLocationY = event.clientY - containerBoundingBox.top;
+  let relativeClickLocationX = clientX - containerBoundingBox.left;
+  let relativeClickLocationY = clientY - containerBoundingBox.top;
 
   //Check if click was on the slider border
   if (
@@ -107,20 +144,28 @@ function onKnobDrag(event) {
 
   let dragFunction = knobDragging.bind(this);
   this.classList.add("dragging");
-  //  addEventListener("mousemove", dragFunction);
-  addEventListener("touchmove", dragFunction);
-  document.body.classList.add("dragging");
+  if (isMobile) {
+    addEventListener("touchmove", dragFunction);
+    addEventListener("touchend", () => {
+      removeEventListener("touchmove", dragFunction);
+      this.classList.remove("dragging");
+      document.body.classList.remove("dragging");
+    }, {once: true});
 
-  addEventListener("mouseup", () => {
-    removeEventListener("mousemove", dragFunction);
-    this.classList.remove("dragging");
-    document.body.classList.remove("dragging");
-  }, {once: true});
+  } else {
+    addEventListener("mousemove", dragFunction);
+    addEventListener("mouseup", () => {
+      removeEventListener("mousemove", dragFunction);
+      this.classList.remove("dragging");
+      document.body.classList.remove("dragging");
+    }, {once: true});
+  }
+  document.body.classList.add("dragging");
 }
 
 function knobDragging(event) {
   let container = this.parentNode;
-  let label = this.parentNode.parentNode.querySelector(".label_container #" + this.dataset.label);
+  let label = this.parentNode.parentNode.parentNode.querySelector(".label_container #" + this.dataset.label);
   let labelValue = label.querySelector(".label_value");
   let min = parseInt(label.dataset.min);
   let max = parseInt(label.dataset.max);
@@ -129,6 +174,10 @@ function knobDragging(event) {
   //Mouse coordinates
   let mouseX = event.pageX;
   let mouseY = event.pageY;
+  if (isMobile) {
+    mouseX = event.touches[0].pageX;
+    mouseY = event.touches[0].pageY;
+  }
 
   //Container center coordinates
   let containerBoundingRect = container.getBoundingClientRect();
@@ -182,7 +231,7 @@ function knobDragging(event) {
   this.style.top = radius - knobPositionY + knobOffset;
 
   //Overlays
-  let circular_slider = this.parentNode.querySelector(".circular_slider");
+  let circular_slider = this.parentNode;
   circular_slider.style.setProperty("--progress", ((100 * rotation) / 360) + "%");
 
 }
