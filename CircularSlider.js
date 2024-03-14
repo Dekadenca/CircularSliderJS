@@ -134,7 +134,7 @@ function onSliderClick(event) {
     //Checks min circle
     Math.pow(relativeClickLocationX - containerRadius, 2) + Math.pow(relativeClickLocationY - containerRadius, 2) > Math.pow(containerRadius - KNOB_SIZE, 2)
   ) {
-    let sliderKnob = this.parentNode.querySelector(".knob");
+    let sliderKnob = this.querySelector(".knob");
     onKnobDrag.bind(sliderKnob, event)();
   }
 }
