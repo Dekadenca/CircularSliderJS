@@ -10,28 +10,53 @@
   initial-value: black;
 }
 
-.container {
+@import url('https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Inter:wght@400;600;700;800&family=Roboto:ital,wght@0,400;0,700;1,700&display=swap')
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
   display: flex;
-  background: rgb(102, 102, 102);
-  background: linear-gradient(
-    90deg,
-    rgba(102, 102, 102, 1) 0%,
-    rgba(102, 102, 102, 1) 50%,
-    rgba(255, 255, 255, 1) 100%
-  );
+  align-items: center;
+  justify-content: center;
+  font-family: Roboto;
+}
+
+.container {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 1;
+  background: linear-gradient(190deg, rgba(255,255,255,1) 0%, rgba(202,203,205,1) 100%);
+  padding: 16px;
+  align-items: center;
+  gap: 24px;
+  height: 400px;
 }
 
 .label_container {
   position: relative;
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  align-content: center;
+  flex-direction: column;
+
+  div {
+    white-space: nowrap;
+  }
 }
 
 .label {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .label_color {
@@ -43,10 +68,31 @@
 .label_value {
   font-size: 30px;
   font-weight: bold;
+  min-width:  5ch;
+  text-align: right;
 }
 
 .sliders_container {
   position: relative;
+  width:  100%;
+  height:  100%;
+  display: flex;
+  width: 350px;
+  height: 350px;
+}
+
+.sliders_container:before {
+    content: "Adjust dial to enter expenses";
+    text-transform: uppercase;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -24px;
+    white-space: nowrap;
 }
 
 .circular_slider {
@@ -54,8 +100,29 @@
   display: grid;
   place-items: center;
   border-radius: 100%;
+  mix-blend-mode: multiply;
+  background: conic-gradient(var(--overlay-color), var(--overlay-color) var(--progress), #cfcfd0 0%);
+  opacity: 0.7;
+}
 
-  background: conic-gradient(var(--overlay-color), var(--overlay-color) var(--progress), gray 0%);
+.circular_slider::before {
+  content: "";
+  background-image: url('segments-36.svg');
+  background-size: 400px 400px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  border-radius: inherit;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  mix-blend-mode: soft-light;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .circular_slider::after {
@@ -66,6 +133,19 @@
   border-radius: inherit;
   display: grid;
   place-items: center;
+  z-index: 2;
+}
+
+.circular_slider:nth-last-child(1)::before {
+    background-image: url('segments-36.svg');
+}
+
+.circular_slider:nth-last-child(2)::before {
+    background-image: url('segments-60.svg');
+}
+
+.circular_slider:nth-last-child(3)::before {
+    background-image: url('segments-80.svg');
 }
 
 .knob {
@@ -79,7 +159,6 @@
   height: 30px;
   background-color: white;
   cursor: grab;
-
   top: 14px;
   left: 50%;
   transform: translate(-50%, -50%);

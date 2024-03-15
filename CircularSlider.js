@@ -1,5 +1,4 @@
 var KNOB_SIZE = 30;
-var LABEL_CONTAINER_WIDTH = "12rem";
 
 var isMobile = mobileAndTabletCheck();
 
@@ -43,7 +42,6 @@ function circularSlider({
     container.appendChild(slidersContainer);
   }
 
-  labelContainer.style.width = LABEL_CONTAINER_WIDTH;
   labelContainer.classList.add("label_container");
   labelContainer.appendChild(createLabel(color, label, max, min, step));
 
@@ -75,9 +73,10 @@ function circularSlider({
 
   //Correct position of sliders after all of them are added
   let sliders = slidersContainer.children;
+  console.log(container.getBoundingClientRect());
   for (let i = 0; i < sliders.length; i++) {
-    sliders[i].style.left = Math.abs(sliders[i].getBoundingClientRect().height - container.getBoundingClientRect().height) / 2;
-    sliders[i].style.top = Math.abs(sliders[i].getBoundingClientRect().height - container.getBoundingClientRect().height) / 2;
+    sliders[i].style.left = Math.abs(sliders[i].getBoundingClientRect().height - slidersContainer.getBoundingClientRect().height) / 2;
+    sliders[i].style.top = Math.abs(sliders[i].getBoundingClientRect().height - slidersContainer.getBoundingClientRect().height) / 2;
   }
 
   return;
